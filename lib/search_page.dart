@@ -67,6 +67,9 @@ class SearchPage<T> extends SearchDelegate<T?> {
   /// The style of the [searchFieldLabel] text widget.
   final TextStyle? searchStyle;
 
+  /// The value greater against which the partialRatio is calculated.
+  final int fuzzyValue;
+
   final SortCallback<T>? sort;
 
   SearchPage({
@@ -83,6 +86,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
     this.onQueryUpdate,
     this.searchStyle,
     this.sort,
+    this.fuzzyValue = 50,
   }) : super(
           searchFieldLabel: searchLabel,
           searchFieldStyle: searchStyle,
@@ -150,7 +154,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
     //   return value.endsWith(query);
     // }
     // return value.contains(query);
-    return partialRatio(query, value) > 30;
+    return partialRatio(query, value) > fuzzyValue;
   }
 
   @override
