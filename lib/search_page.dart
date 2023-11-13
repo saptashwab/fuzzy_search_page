@@ -150,7 +150,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
     //   return value.endsWith(query);
     // }
     // return value.contains(query);
-    return tokenSortPartialRatio(query, value) > 80;
+    return partialRatio(query, value) > 80;
   }
 
   @override
