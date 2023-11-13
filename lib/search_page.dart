@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart'
 
 typedef SearchFilter<T> = List<String?> Function(T t);
 typedef ResultBuilder<T> = Widget Function(T t);
@@ -139,16 +140,17 @@ class SearchPage<T> extends SearchDelegate<T?> {
     if (value == null) {
       return false;
     }
-    if (itemStartsWith && itemEndsWith) {
-      return value == query;
-    }
-    if (itemStartsWith) {
-      return value.startsWith(query);
-    }
-    if (itemEndsWith) {
-      return value.endsWith(query);
-    }
-    return value.contains(query);
+    // if (itemStartsWith && itemEndsWith) {
+    //   return value == query;
+    // }
+    // if (itemStartsWith) {
+    //   return value.startsWith(query);
+    // }
+    // if (itemEndsWith) {
+    //   return value.endsWith(query);
+    // }
+    // return value.contains(query);
+    return tokenSortPartialRatio(query, value);
   }
 
   @override
