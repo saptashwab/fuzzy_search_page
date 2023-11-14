@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
+class TfIdf {
+  String word;
+  double score;
+
+  TfIdf({
+    required this.word,
+    required this.score,
+  });
+
+  @override
+  int get hashCode => word.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TfIdf && word.hashCode == other.word.hashCode;
+}
+
+typedef TfIdfFilter<T> = List<List<TfIdf>> Function(T t);
 typedef SearchFilter<T> = List<dynamic?> Function(T t);
 typedef ResultBuilder<T> = Widget Function(T t);
 typedef SortCallback<T> = int Function(T a, T b);
@@ -44,6 +63,9 @@ class SearchPage<T> extends SearchDelegate<T?> {
   /// Al parameters to filter through must be [String] instances.
   final SearchFilter<T> filter;
 
+  /// Method that returns the tfidf list related to a [T] instance
+  final TfIdfFilter<T> tfIdfFilter;
+
   /// This text will be shown in the [AppBar] when
   /// current query is empty.
   final String? searchLabel;
@@ -81,6 +103,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
     required this.builder,
     required this.filter,
     required this.items,
+    required this.tfIdfFilter,
     this.showItemsOnEmpty = false,
     this.searchLabel,
     this.barTheme,
@@ -172,6 +195,40 @@ class SearchPage<T> extends SearchDelegate<T?> {
     // }
   }
 
+  bool _filterByTfIdfValue({
+    required String query,
+    required List<TfIdf> value,
+  }) {
+    if (value == null) {
+      return false;
+    }
+    // if (itemStartsWith && itemEndsWith) {
+    //   return value == query;
+    // }
+    // if (itemStartsWith) {
+    //   return value.startsWith(query);
+    // }
+    // if (itemEndsWith) {
+    //   return value.endsWith(query);
+    // }
+    // return value.contains(query);
+    // if (value is String) {
+    //   return partialRatio(query, value) > fuzzyValue;
+    // } else {
+    // TfIdfList testList = [['a', '1.0']];
+    // final bestMatch = extractOne(query: query, choices: wordList, cutoff: 10);
+    // final bestMatchIndex = wordList.indexOf(bestMatch.string);
+    final wordList = value.map((e) => e.word).toList();
+    final bestMatch = extractOne(query: query, choices: wordList);
+    final bestMatchIndex = bestMatch.index;
+    final partialRatio1 = partialRatio(query, value[bestMatchIndex].word);
+    return (partialRatio1 * value[bestMatchIndex].score) / 100 > fuzzyValue;
+    // }
+    // else {
+    //   return false;
+    // }
+  }
+
   @override
   Widget buildSuggestions(BuildContext context) {
     // Calles the 'onQueryUpdated' functions at the start of the operation
@@ -182,7 +239,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
 
     // Using the [filter] method, filters through the [items] list
     // in order to select matching items
-    final result = items
+    List<T> result1 = items
         .where(
           // First we collect all [String] representation of each [item]
           (item) => filter(item)
@@ -195,6 +252,22 @@ class SearchPage<T> extends SearchDelegate<T?> {
               .any((value) => _filterByValue(query: cleanQuery, value: value)),
         )
         .toList();
+
+    List<T> result2 = items
+        .where(
+          (item) => tfIdfFilter(item)
+              // Then, transforms all results to lower case letters
+              // .map((value) => value is String
+              //     ? value?.toLowerCase().trim()
+              //     : [value?[0].toLowerCase().trim(), value?[1]])
+              // Finally, checks wheters any coincide with the cleaned query
+              // Checks wheter the [startsWith] or [endsWith] are 'true'
+              .any((value) =>
+                  _filterByTfIdfValue(query: cleanQuery, value: value)),
+        )
+        .toList();
+
+    final result = [...result1, ...result2].toSet().toList();
 
     if (sort != null) {
       result.sort(sort);
