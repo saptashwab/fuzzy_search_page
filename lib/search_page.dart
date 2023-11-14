@@ -159,16 +159,17 @@ class SearchPage<T> extends SearchDelegate<T?> {
     // return value.contains(query);
     if (value is String) {
       return partialRatio(query, value) > fuzzyValue;
-    } else if (value is TfIdfScore) {
+    } else {
       // TfIdfList testList = [['a', '1.0']];
       // final bestMatch = extractOne(query: query, choices: wordList, cutoff: 10);
       // final bestMatchIndex = wordList.indexOf(bestMatch.string);
 
       final partialRatio1 = partialRatio(query, value[0]);
-      return (partialRatio1 * double.parse(value[1])) > fuzzyValue;
-    } else {
-      return false;
+      return (partialRatio1 * double.parse(value[1])) / 100 > fuzzyValue;
     }
+    // else {
+    //   return false;
+    // }
   }
 
   @override
@@ -186,7 +187,9 @@ class SearchPage<T> extends SearchDelegate<T?> {
           // First we collect all [String] representation of each [item]
           (item) => filter(item)
               // Then, transforms all results to lower case letters
-              .map((value) => value?.toLowerCase().trim())
+              .map((value) => value is String
+                  ? value?.toLowerCase().trim()
+                  : [value?[0].toLowerCase().trim(), value?[1]])
               // Finally, checks wheters any coincide with the cleaned query
               // Checks wheter the [startsWith] or [endsWith] are 'true'
               .any((value) => _filterByValue(query: cleanQuery, value: value)),
