@@ -5,7 +5,8 @@ typedef SearchFilter<T> = List<dynamic?> Function(T t);
 typedef ResultBuilder<T> = Widget Function(T t);
 typedef SortCallback<T> = int Function(T a, T b);
 
-typedef TfIdfList = List<(String, double)>;
+// typedef TfIdfList = List<(String, double)>;
+typedef TfIdfList = List<List<String>>;
 
 /// This class helps to implement a search view, using [SearchDelegate].
 /// It can show suggestion & unsuccessful-search widgets.
@@ -159,11 +160,12 @@ class SearchPage<T> extends SearchDelegate<T?> {
     if (value is String) {
       return partialRatio(query, value) > fuzzyValue;
     } else if (value is TfIdfList) {
-      TfIdfList testList = [('a', 1)];
-      List<String> wordList = value.map((e) => e.$1).toList();
+      // TfIdfList testList = [['a', '1.0']];
+      List<String> wordList = value.map((e) => e[0]).toList();
       final bestMatch = extractOne(query: query, choices: wordList, cutoff: 10);
       final bestMatchIndex = wordList.indexOf(bestMatch.string);
-      return bestMatch.score * value[bestMatchIndex].$2 > fuzzyValue;
+      return (bestMatch.score * double.parse(value[bestMatchIndex][1])) >
+          fuzzyValue;
     } else {
       return false;
     }
