@@ -95,10 +95,10 @@ class SearchPage<T> extends SearchDelegate<T?> {
   final TextStyle? searchStyle;
 
   /// The value against which the partialRatio is calculated for filter items. Provice a number between 0.0 and 100.0. Use a higher number to give closer matches.
-  final int fuzzyValue;
+  final double fuzzyValue;
 
   /// The value against which the partialRatio is calculated for tfidf items. Provice a number between 0.0 and 100.0. Use a higher number to give closer matches.
-  final int tfIdfFuzzyValue;
+  final double tfIdfFuzzyValue;
 
   final SortCallback<T>? sort;
 
@@ -117,8 +117,8 @@ class SearchPage<T> extends SearchDelegate<T?> {
     this.onQueryUpdate,
     this.searchStyle,
     this.sort,
-    this.fuzzyValue = 50,
-    this.tfIdfFuzzyValue = 50,
+    this.fuzzyValue = 50.0,
+    this.tfIdfFuzzyValue = 50.0,
   }) : super(
           searchFieldLabel: searchLabel,
           searchFieldStyle: searchStyle,
