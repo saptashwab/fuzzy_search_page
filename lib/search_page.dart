@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
-typedef SearchFilter<T> = List<String?> Function(T t);
+typedef SearchFilter<T> = List<dynamic?> Function(T t);
 typedef ResultBuilder<T> = Widget Function(T t);
 typedef SortCallback<T> = int Function(T a, T b);
+
+typedef TfIdfList = List<(String, double)>;
 
 /// This class helps to implement a search view, using [SearchDelegate].
 /// It can show suggestion & unsuccessful-search widgets.
@@ -139,7 +141,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
 
   bool _filterByValue({
     required String query,
-    required String? value,
+    required dynamic? value,
   }) {
     if (value == null) {
       return false;
@@ -154,7 +156,17 @@ class SearchPage<T> extends SearchDelegate<T?> {
     //   return value.endsWith(query);
     // }
     // return value.contains(query);
-    return partialRatio(query, value) > fuzzyValue;
+    if (value is String) {
+      return partialRatio(query, value) > fuzzyValue;
+    } else if (value is TfIdfList) {
+      TfIdfList testList = [('a', 1)];
+      List<String> wordList = value.map((e) => e.$1).toList();
+      final bestMatch = extractOne(query: query, choices: wordList, cutoff: 10);
+      final bestMatchIndex = wordList.indexOf(bestMatch.string);
+      return bestMatch.score * value[bestMatchIndex].$2 > fuzzyValue;
+    } else {
+      return false;
+    }
   }
 
   @override
