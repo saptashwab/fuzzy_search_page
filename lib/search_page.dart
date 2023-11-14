@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
@@ -92,8 +94,11 @@ class SearchPage<T> extends SearchDelegate<T?> {
   /// The style of the [searchFieldLabel] text widget.
   final TextStyle? searchStyle;
 
-  /// The value against which the partialRatio is calculated. Provice a number between 0.0 and 100.0. Use a higher number to give closer matches.
+  /// The value against which the partialRatio is calculated for filter items. Provice a number between 0.0 and 100.0. Use a higher number to give closer matches.
   final int fuzzyValue;
+
+  /// The value against which the partialRatio is calculated for tfidf items. Provice a number between 0.0 and 100.0. Use a higher number to give closer matches.
+  final int tfIdfFuzzyValue;
 
   final SortCallback<T>? sort;
 
@@ -113,6 +118,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
     this.searchStyle,
     this.sort,
     this.fuzzyValue = 50,
+    this.tfIdfFuzzyValue = 50,
   }) : super(
           searchFieldLabel: searchLabel,
           searchFieldStyle: searchStyle,
@@ -219,10 +225,17 @@ class SearchPage<T> extends SearchDelegate<T?> {
     // final bestMatch = extractOne(query: query, choices: wordList, cutoff: 10);
     // final bestMatchIndex = wordList.indexOf(bestMatch.string);
     final wordList = value.map((e) => e.word).toList();
+    final scoreList = value.map((e) => e.score).toList();
     final bestMatch = extractOne(query: query, choices: wordList);
     final bestMatchIndex = bestMatch.index;
     final partialRatio1 = partialRatio(query, value[bestMatchIndex].word);
-    return (partialRatio1 * value[bestMatchIndex].score) / 100 > fuzzyValue;
+    final divideFactor = scoreList.length < 1
+        ? 1000
+        : scoreList.reduce(max) > 1
+            ? 100
+            : 1;
+    return (partialRatio1 * value[bestMatchIndex].score) / divideFactor >
+        tfIdfFuzzyValue;
     // }
     // else {
     //   return false;
