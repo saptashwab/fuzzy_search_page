@@ -70,7 +70,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
   /// The style of the [searchFieldLabel] text widget.
   final TextStyle? searchStyle;
 
-  /// The value greater against which the partialRatio is calculated.
+  /// The value against which the partialRatio is calculated. Provice a number between 0.0 and 100.0. Use a higher number to give closer matches.
   final int fuzzyValue;
 
   final SortCallback<T>? sort;
