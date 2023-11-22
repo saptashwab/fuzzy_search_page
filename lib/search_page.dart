@@ -193,8 +193,12 @@ class SearchPage<T> extends SearchDelegate<T?> {
       // final bestMatch = extractOne(query: query, choices: wordList, cutoff: 10);
       // final bestMatchIndex = wordList.indexOf(bestMatch.string);
 
-      final partialRatio1 = partialRatio(query, value[0]);
-      return (partialRatio1 * double.parse(value[1])) / 100 > fuzzyValue;
+      // final partialRatio1 = partialRatio(query, value[0]);
+      // return (partialRatio1 * double.parse(value[1])) / 100 > fuzzyValue;
+      final partialRatioList =
+          value.map((e) => partialRatio(query, e)).toList();
+      final maxPartialRatio = partialRatioList.reduce(max);
+      return maxPartialRatio > fuzzyValue;
     }
     // else {
     //   return false;
