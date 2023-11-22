@@ -259,7 +259,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
               // Then, transforms all results to lower case letters
               .map((value) => value is String
                   ? value?.toLowerCase().trim()
-                  : [value?[0].toLowerCase().trim(), value?[1]])
+                  : value?.map((e) => e?.toLowerCase().trim() ?? '').toList())
               // Finally, checks wheters any coincide with the cleaned query
               // Checks wheter the [startsWith] or [endsWith] are 'true'
               .any((value) => _filterByValue(query: cleanQuery, value: value)),
