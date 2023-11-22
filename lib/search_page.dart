@@ -195,6 +195,7 @@ class SearchPage<T> extends SearchDelegate<T?> {
 
       // final partialRatio1 = partialRatio(query, value[0]);
       // return (partialRatio1 * double.parse(value[1])) / 100 > fuzzyValue;
+      if (value.length < 1) return false;
       final partialRatioList =
           value.map((e) => partialRatio(query, e)).toList();
       final maxPartialRatio = partialRatioList.reduce(max);
